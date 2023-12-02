@@ -13,20 +13,22 @@ async function main() {
   }
   const consumer = OracleConsumerContract.attach(consumerSC);
   console.log("Pushing a request...");
-  await consumer.connect(deployer).request("0x01");
-  consumer.on("ResponseReceived", async (reqId: number, pair: string, value: string) => {
+  await consumer.connect(deployer).request("0xeaf55242a90bb3289db8184772b0b98562053559");
+  consumer.on("ResponseReceived", async (reqId: number, requester: string, target: string, score: string) => {
     console.info("Received event [ResponseReceived]:", {
       reqId,
-      pair,
-      value,
+      requester,
+      target,
+      score,
     });
     process.exit();
   });
-  consumer.on("ErrorReceived", async (reqId: number, pair: string, value: string) => {
+  consumer.on("ErrorReceived", async (reqId: number, requester: string, target: string, error: string) => {
     console.info("Received event [ErrorReceived]:", {
       reqId,
-      pair,
-      value,
+      requester,
+      target,
+      error,
     });
     process.exit();
   });

@@ -13,7 +13,7 @@ async function main() {
   ])
 
   console.log('Pushing a malformed request...');
-  await consumer.connect(deployer).malformedRequest("0x01");
+  await consumer.connect(deployer).malformedRequest("0xeaf55242a90bb3289dB8184772b0B98562053559");
   console.log('Done');
 }
 

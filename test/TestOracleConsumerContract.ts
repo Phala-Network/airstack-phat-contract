@@ -35,8 +35,8 @@ describe("OracleConsumerContract.sol", function () {
     const consumer = await TestOracleConsumerContract.deploy(deployer.address);
 
     // Make a request
-    const profileId = "0x01";
-    const tx = await consumer.request(profileId);
+    const targetAddress = "";
+    const tx = await consumer.request(targetAddress);
     const receipt = await tx.wait();
     const reqEvents = receipt.events;
     expect(reqEvents![0]).to.have.property("event", "MessageQueued");
@@ -46,9 +46,10 @@ describe("OracleConsumerContract.sol", function () {
 
     // Check response data
     expect(respEvents[0]).to.have.property("event", "ResponseReceived");
-    const [reqId, pair, value] = respEvents[0].args;
+    const [reqId, requester, target, score] = respEvents[0].args;
     expect(ethers.BigNumber.isBigNumber(reqId)).to.be.true;
-    expect(pair).to.equal(profileId);
-    expect(ethers.BigNumber.isBigNumber(value)).to.be.true;
+    expect(target).to.equal(targetAddress);
+    expect(requester).to.equal(deployer.address);
+    expect(ethers.BigNumber.isBigNumber(score)).to.be.true;
   });
 });
