@@ -6,7 +6,7 @@ import { execSync } from "child_process";
 async function waitForResponse(consumer: Contract, event: Event) {
   const [, data] = event.args!;
   // Run Phat Function
-  const result = execSync(`phat-fn run --json dist/index.js -a ${data} {apiUrl: "https://api.airstack.xyz/gql", apiKey: "3a41775a358a4cb99ca9a29c1f6fc486"}`).toString();
+  const result = execSync(`phat-fn run --json dist/index.js -a ${data} '{"apiUrl": "https://api.airstack.xyz/gql", "apiKey": "3a41775a358a4cb99ca9a29c1f6fc486"}'`).toString();
   const json = JSON.parse(result);
   const action = ethers.utils.hexlify(ethers.utils.concat([
     new Uint8Array([0]),
@@ -35,7 +35,7 @@ describe("OracleConsumerContract.sol", function () {
     const consumer = await TestOracleConsumerContract.deploy(deployer.address);
 
     // Make a request
-    const targetAddress = "";
+    const targetAddress = "0xeaf55242a90bb3289dB8184772b0B98562053559";
     const tx = await consumer.request(targetAddress);
     const receipt = await tx.wait();
     const reqEvents = receipt.events;
