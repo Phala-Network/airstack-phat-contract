@@ -7,8 +7,8 @@ import "@phala/pink-env";
 import {decodeAbiParameters, encodeAbiParameters, parseAbiParameters} from "viem";
 
 type HexString = `0x${string}`;
-const encodeReplyAbiParams = 'uint respType, uint id, uint256 data';
-const decodeRequestAbiParams = 'uint id, string reqData';
+const encodeReplyAbiParams = 'uint respType, uint id, uint256 score';
+const decodeRequestAbiParams = 'uint id, address sender, address target';
 
 function encodeReply(abiParams: string, reply: any): HexString {
   return encodeAbiParameters(parseAbiParameters(abiParams),
@@ -47,7 +47,6 @@ function errorToCode(error: Error): number {
       return 0;
   }
 }
-
 function stringToHex(str: string): string {
   var hex = "";
   for (var i = 0; i < str.length; i++) {
@@ -56,63 +55,68 @@ function stringToHex(str: string): string {
   return "0x" + hex;
 }
 
-function fetchApiStats(apiUrl: string, requestStr: string): any {
+function fetchApiStats(apiUrl: string, apiKey: string, requester: string, target: string): any {
   let headers = {
     "Content-Type": "application/json",
     "User-Agent": "phat-contract",
+    "Authorization": `${apiKey}`
   };
-  let query = JSON.stringify({
-    query: `
-      query Profile {
-        profile(request: { forProfileId: "${requestStr}" }) {
-          stats {
-              followers
-              following
-              comments
-              countOpenActions
-              posts
-              quotes
-              mirrors
-              publications
-              reacted
-              reactions
-          }
-        }
-      }
-    `,
-  });
-  let body = stringToHex(query);
+  const sentTokensToTarget =  JSON.stringify({ query: `
+  query GetTokenTransfers { ethereum: TokenTransfers(input: {filter: {from: {_in: ["${requester}"]}, to: {_eq: "${target}"}}, blockchain: ethereum}) { TokenTransfer { from { addresses domains { name } socials { dappName profileName profileTokenId profileTokenIdHex userId userAssociatedAddresses } } to { addresses domains { name } socials { dappName profileName profileTokenId profileTokenIdHex userId userAssociatedAddresses } } transactionHash } } polygon: TokenTransfers(input: {filter: {from: {_in: ["${requester}"]}, to: {_eq: "${target}"}}, blockchain: polygon}) { TokenTransfer { from { addresses domains { name } socials { dappName profileName profileTokenId profileTokenIdHex userId userAssociatedAddresses } } to { addresses domains { name } socials { dappName profileName profileTokenId profileTokenIdHex userId userAssociatedAddresses } } transactionHash } } }
+  `});
+  const hasLensProfile =  JSON.stringify({ query: `
+  query MyQuery { Socials( input: { filter: { dappName: { _eq: lens } identity: { _in: ["${target}"] } } blockchain: ethereum } ) { Social { profileName profileTokenId profileTokenIdHex }}}
+  `});
+  const hasFarcasterAccount =  JSON.stringify({ query: `
+  query MyQuery { Socials( input: { filter: { dappName: { _eq: farcaster } identity: { _in: ["${target}"] } } blockchain: ethereum } ) { Social { profileName userId userAssociatedAddresses }}}
+  `});
+  const hasPrimaryEns =  JSON.stringify({ query: `
+  query MyQuery { Domains(input: {filter: {owner: {_in: ["${target}"]}, isPrimary: {_eq: true}}, blockchain: ethereum}) { Domain { name owner isPrimary }}}
+  `});
+  const hasCommonPoaps = JSON.stringify({ query: `
+  query CommonPoaps { Poaps( input: { filter: { owner: { _eq: "${target}" } } blockchain: ALL limit: 100 }) { Poap { poapEvent { poaps(input: { filter: { owner: { _eq: "${requester}" } } }) { eventId mintHash poapEvent { eventName eventURL isVirtualEvent }}}}}}
+  `});
   //
   // In Phat Contract runtime, we not support async/await, you need use `pink.batchHttpRequest` to
   // send http request. The Phat Contract will return an array of response.
   //
   let response = pink.batchHttpRequest(
     [
-      {
-        url: apiUrl,
-        method: "POST",
-        headers,
-        body,
-        returnTextBody: true,
-      },
+      { url: apiUrl, method: "POST", headers, body: stringToHex(sentTokensToTarget), returnTextBody: true },
+      { url: apiUrl, method: "POST", headers, body: stringToHex(hasLensProfile), returnTextBody: true },
+      { url: apiUrl, method: "POST", headers, body: stringToHex(hasFarcasterAccount), returnTextBody: true },
+      { url: apiUrl, method: "POST", headers, body: stringToHex(hasPrimaryEns), returnTextBody: true },
+      { url: apiUrl, method: "POST", headers, body: stringToHex(hasCommonPoaps), returnTextBody: true },
     ],
     10000 // Param for timeout in milliseconds. Your Phat Contract script has a timeout of 10 seconds
-  )[0]; // Notice the [0]. This is important bc the `pink.batchHttpRequest` function expects an array of up to 5 HTTP requests.
-  if (response.statusCode !== 200) {
+  ); // Notice the [0]. This is important bc the `pink.batchHttpRequest` function expects an array of up to 5 HTTP requests.
+  console.log(response);
+  checkResponse(response);
+  if (response[0].statusCode !== 200) {
     console.log(
-      `Fail to read Lens api with status code: ${response.statusCode}, error: ${
-        response.error || response.body
+      `Fail to read Lens api with status code: ${response[0].statusCode}, error: ${
+        response[0].error || response[0].body
       }}`
     );
     throw Error.FailedToFetchData;
   }
-  let respBody = response.body;
+  let respBody = response[0].body;
   if (typeof respBody !== "string") {
     throw Error.FailedToDecode;
   }
   return JSON.parse(respBody);
 }
 
+function checkResponse(responses: any): boolean {
+  for (let response of responses) {
+    console.log(response);
+  }
+  return true;
+}
+
+function computeTrustScore() {
+
+}
 //
 // Here is what you need to implemented for Phat Contract, you can customize your logic with
 // JavaScript here.
@@ -131,19 +135,21 @@ function fetchApiStats(apiUrl: string, requestStr: string): any {
 export default function main(request: HexString, secrets: string): HexString {
   console.log(`handle req: ${request}`);
   // Uncomment to debug the `secrets` passed in from the Phat Contract UI configuration.
-  // console.log(`secrets: ${secrets}`);
-  let requestId, encodedReqStr;
+  console.log(`secrets: ${secrets}`);
+  let requestId, requesterAddress, targetAddress, parsedSecrets;
   try {
-    [requestId, encodedReqStr] = decodeRequest(decodeRequestAbiParams, request);
-    console.log(`[${requestId}]: ${encodedReqStr}`);
+    [requestId, requesterAddress, targetAddress] = decodeRequest(`${decodeRequestAbiParams}`, request);
+    console.log(`[${requestId}]: ${requesterAddress} ${targetAddress}`);
+    parsedSecrets = JSON.parse(secrets);
+
   } catch (error) {
     console.info("Malformed request received");
     return encodeReply(encodeReplyAbiParams, [BigInt(TYPE_ERROR), 0n, BigInt(errorToCode(error as Error))]);
   }
-  console.log(`Request received for profile ${encodedReqStr}`);
+  console.log(`Request received for profile ${requesterAddress} ${targetAddress}`);
   try {
-    const respData = fetchApiStats(secrets, encodedReqStr);
-    let stats = respData.data.profile.stats.posts;
+    const respData = fetchApiStats(parsedSecrets.apiUrl, parsedSecrets.apiKey, requesterAddress, targetAddress);
+    let stats = 0;
     console.log("response:", [TYPE_RESPONSE, requestId, stats]);
     return encodeReply(encodeReplyAbiParams, [TYPE_RESPONSE, requestId, stats]);
   } catch (error) {

@@ -6,7 +6,7 @@ import { execSync } from "child_process";
 async function waitForResponse(consumer: Contract, event: Event) {
   const [, data] = event.args!;
   // Run Phat Function
-  const result = execSync(`phat-fn run --json dist/index.js -a ${data} https://api-v2-mumbai-live.lens.dev/`).toString();
+  const result = execSync(`phat-fn run --json dist/index.js -a ${data} {apiUrl: "https://api.airstack.xyz/gql", apiKey: "3a41775a358a4cb99ca9a29c1f6fc486"}`).toString();
   const json = JSON.parse(result);
   const action = ethers.utils.hexlify(ethers.utils.concat([
     new Uint8Array([0]),
