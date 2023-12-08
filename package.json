@@ -26,8 +26,8 @@
     "localhost-deploy": "hardhat run --network localhost ./scripts/localhost/deploy.ts",
     "localhost-watch": "phat-fn watch",
     "localhost-push-request": "hardhat run --network localhost ./scripts/localhost/push-request.ts",
-    "test-deploy-function": "phat-fn upload --coreSettings=https://api-v2-mumbai-live.lens.dev/",
-    "main-deploy-function": "phat-fn upload --mode=production --coreSettings=https://api-v2.lens.dev/",
+    "test-deploy-function": "phat-fn upload --coreSettings='{\"apiUrl\": \"https://api.airstack.xyz/gql\", \"apiKey\": \"3a41775a358a4cb99ca9a29c1f6fc486\"}'",
+    "main-deploy-function": "phat-fn upload --mode=production --coreSettings='{\"apiUrl\": \"https://api.airstack.xyz/gql\", \"apiKey\": \"3a41775a358a4cb99ca9a29c1f6fc486\"}'",
     "test-update-function": "phat-fn update",
     "main-update-function": "phat-fn update --mode=production"
   },
