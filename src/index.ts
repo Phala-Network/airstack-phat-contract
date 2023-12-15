@@ -166,7 +166,7 @@ export default function main(request: HexString, secrets: string): HexString {
     parsedSecrets = JSON.parse(secrets);
   } catch (error) {
     console.info("Malformed request received");
-    return encodeReply(encodeReplyAbiParams, [TYPE_ERROR, requestId, requesterAddress, errorToCode(error as Error)]);
+    return encodeReply(encodeReplyAbiParams, [TYPE_ERROR, 0n, 0x0000000000000000000000000000000000000000, errorToCode(error as Error)]);
   }
   console.log(`Request received for profile ${requesterAddress} ${targetAddress}`);
   try {
