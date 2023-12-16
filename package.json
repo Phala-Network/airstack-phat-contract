@@ -1,5 +1,5 @@
 {
-  "name": "phat-contract-starter-kit",
+  "name": "airstack-phat-contract",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -29,7 +29,8 @@
     "test-deploy-function": "phat-fn upload --coreSettings='{\"apiUrl\": \"https://api.airstack.xyz/gql\", \"apiKey\": \"3a41775a358a4cb99ca9a29c1f6fc486\"}'",
     "main-deploy-function": "phat-fn upload --mode=production --coreSettings='{\"apiUrl\": \"https://api.airstack.xyz/gql\", \"apiKey\": \"3a41775a358a4cb99ca9a29c1f6fc486\"}'",
     "test-update-function": "phat-fn update",
-    "main-update-function": "phat-fn update --mode=production"
+    "main-update-function": "phat-fn update --mode=production",
+    "postinstall": "patch-package"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.4.7",
@@ -56,9 +57,10 @@
   "dependencies": {
     "@openzeppelin/contracts": "4.9.3",
     "@phala/fn": "~0.2",
-    "@phala/solidity": "^0.0.3",
+    "@phala/solidity": "^0.0.4",
     "dedent": "^1.5.1",
     "dotenv": "^16.0.3",
+    "patch-package": "^8.0.0",
     "viem": "^1.19.3"
   }
 }
