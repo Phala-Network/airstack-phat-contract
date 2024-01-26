@@ -12,11 +12,15 @@ async function main() {
   const consumer = await OracleConsumerContract.deploy(attestor);
   await consumer.deployed();
   const finalMessage = dedent`
-    🎉 Your Consumer Contract has been deployed, check it out here: https://polygonscan.com/address/${consumer.address}
-    
-    You also need to set up the consumer contract address in your .env file:
-    
-    POLYGON_CONSUMER_CONTRACT_ADDRESS=${consumer.address}
+    🎉 Your Consumer Contract has been deployed successfully 🎉
+
+    address ${consumer.address}
+
+    Check it out here: https://polygonscan.com/address/${consumer.address}
+
+    You can continuing deploy the default Phat Contract with following command:
+
+    npx @phala/fn upload -b --consumerAddress=${consumer.address}
   `
   console.log(`\n${finalMessage}\n`);
   console.log('Done');
