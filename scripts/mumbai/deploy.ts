@@ -18,9 +18,9 @@ async function main() {
 
     Check it out here: https://mumbai.polygonscan.com/address/${consumer.address}
 
-    You can continuing deploy the default Phat Contract with following command:
+    You can continue deploying the default Phat Contract with the following command:
 
-    npx @phala/fn upload -b --mode dev --consumerAddress=${consumer.address}
+    npx @phala/fn upload -b --mode dev --consumerAddress=${consumer.address} --coreSettings='{"apiUrl": "https://api.airstack.xyz/gql", "apiKey": "3a41775a358a4cb99ca9a29c1f6fc486"}'
   `
   console.log(`\n${finalMessage}\n`);
   console.log('Done');
