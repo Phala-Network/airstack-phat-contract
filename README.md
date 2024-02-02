@@ -13,7 +13,6 @@ Install the `@phala/fn` CLI tool. You can do this using your node package manage
 
 Once you have the CLI tool installed, you can create your first Phala Oracle template with the following command.
 ```bash
-# Skip this step if chose option 1 or cloned this repo
 npx @phala/fn@latest init example
 ```
 
@@ -50,9 +49,17 @@ Now, build the default Phat Contract function with this command:
 ```bash
 npx @phala/fn build
 ```
-To simulate the expected result locally, run the Phala Oracle function now with this command:
+To simulate the expected result locally, run the Phat Contract script now with the `npx @phala/fn run` command to test the expected output when passing an encoded hexstring and the secrets into the `main` function of the Phat Contract. This is helpful to test locally quick to understand the functionality of your compiled Phat Contract.
+> Go to https://playground.ethers.org to decode and encode the hexstring you want to pass into your Phat Contract main function.
+> In this example, the hexstring `0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000964256674e42d61f0ff84097e28f65311786ccb000000000000000000000000eaf55242a90bb3289db8184772b0b98562053559` represents types `uint id`, `address requester`, and `address target` 
+> Here is what you will enter in the playground:
+> - `utils.defaultAbiCoder.decode(['uint id', 'address requester' 'address target'], '0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000964256674e42d61f0ff84097e28f65311786ccb000000000000000000000000eaf55242a90bb3289db8184772b0b98562053559')`
+> - `[ BigNumber { value: "5" }, "0xeaf55242a90bb3289dB8184772b0B98562053559", "0x624Fef3390A244a834f19b3dBfddC28939530c17", id: BigNumber { value: "5" }, requester: "0xeaf55242a90bb3289dB8184772b0B98562053559", target: "0x624Fef3390A244a834f19b3dBfddC28939530c17" ]`
+> You can easily validate this by encoding the types and data with the utils.defaultAbiCoder.encode() function like below.
+> - `utils.defaultAbiCoder.encode(['uint id', 'address requester', 'address target'], [1, "0xeaf55242a90bb3289dB8184772b0B98562053559", "0x624Fef3390A244a834f19b3dBfddC28939530c17"])`
+> - `"0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000964256674e42d61f0ff84097e28f65311786ccb000000000000000000000000eaf55242a90bb3289db8184772b0b98562053559"`
 ```bash
-npx @phala/fn run dist/index.js -a 0x0000000000000000000000000000000000000000000000000000000000000005000000000000000000000000eaf55242a90bb3289db8184772b0b98562053559000000000000000000000000624fef3390a244a834f19b3dbfddc28939530c170000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001 '{"apiUrl": "https://api.airstack.xyz/gql", "apiKey": "3a41775a358a4cb99ca9a29c1f6fc486"}'
+npx @phala/fn run dist/index.js -a 0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000964256674e42d61f0ff84097e28f65311786ccb000000000000000000000000eaf55242a90bb3289db8184772b0b98562053559 '{"apiUrl": "https://api.airstack.xyz/gql", "apiKey": "3a41775a358a4cb99ca9a29c1f6fc486"}'
 ```
 
 Finally, run the local end-to-end tests with this command. Here we will simulate locally the interaction between the Phat Contract and the Consumer Contract with hardhat.
