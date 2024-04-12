@@ -1,4 +1,12 @@
 # The Airstack Starter Kit
+> :warning: **Important** ⚠️
+> 
+> This guide references the `mumbai` testnet chain. 
+>
+> The `mumbai` testnet is [deprecated since 2024/04/08](https://blog.thirdweb.com/deprecation-of-mumbai-testnet/), meaning the steps to deploy to a testnet will no longer work out of the box.
+>
+> You can opt to use the [amoy](https://polygon.technology/blog/introducing-the-amoy-testnet-for-polygon-pos) testnet or any other EVM testnet instead.
+
 ![](./assets/Airstack.png)
 ## :mag_right: Overview
 The [Airstack](https://www.airstack.xyz/) Starter Kit is your one-stop solution to connect Airstack's API to your smart contract. It offers wide-ranging support for all EVM-compatible blockchains, including but not limited to Ethereum, Polygon, Arbitrum, Avalanche, Binance Smart Chain, Optimism, and zkSync.
